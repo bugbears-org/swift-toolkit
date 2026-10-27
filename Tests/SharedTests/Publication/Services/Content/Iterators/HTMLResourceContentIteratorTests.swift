@@ -845,6 +845,51 @@ struct HTMLResourceContentIteratorTests {
             #expect(result?.locator.locations.cssSelector == "html > body > p.apple.mango.zebra")
         }
     }
+
+    /// A text node holding only whitespace still separates the words around
+    /// it when it sits between two inline elements, as in the sentence spans
+    /// of a Media Overlay book. Around block elements, it is only indentation.
+    struct WhitespaceBetweenInlineElements {
+        @Test func keepsTheSpaceBetweenTwoInlineElements() async throws {
+            let elements = try await allElements("""
+            <p><span id="s1">One sentence.</span> <span id="s2">Another sentence.</span></p>
+            """)
+
+            #expect(texts(of: elements) == ["One sentence. Another sentence."])
+        }
+
+        @Test func collapsesALineBreakBetweenInlineElementsToASpace() async throws {
+            let elements = try await allElements("""
+            <p><span>One.</span>
+                <span>Two.</span></p>
+            """)
+
+            #expect(texts(of: elements) == ["One. Two."])
+        }
+
+        @Test func ignoresWhitespaceBeforeTheFirstInlineElement() async throws {
+            let elements = try await allElements("""
+            <p> <span>One.</span> <span>Two.</span> </p>
+            """)
+
+            #expect(texts(of: elements) == ["One. Two."])
+        }
+
+        @Test func ignoresIndentationAroundBlockElements() async throws {
+            let elements = try await allElements("""
+            <div>
+                <p>One.</p>
+                <p>Two.</p>
+            </div>
+            """)
+
+            #expect(texts(of: elements) == ["One.", "Two."])
+        }
+
+        private func texts(of elements: [ContentElement]) -> [String?] {
+            elements.map { ($0 as? TextContentElement)?.text }
+        }
+    }
 }
 
 // MARK: - Helpers

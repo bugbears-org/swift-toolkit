@@ -665,8 +665,12 @@ private actor Iterator: SearchIterator, Loggable {
             return textEl.locator.href == currentHREF
         }
 
+        // Only the trailing end: the leading whitespace separates the match
+        // from the next word.
         if !hasMoreSameResource && matchEnd + result.count == windowTextCount {
-            result = result.trimmingCharacters(in: .whitespacesAndNewlines)
+            while let last = result.last, last.isWhitespace || last.isNewline {
+                result.removeLast()
+            }
         }
 
         return result.isEmpty ? nil : result

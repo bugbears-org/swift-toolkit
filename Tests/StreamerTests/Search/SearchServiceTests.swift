@@ -423,7 +423,9 @@ struct SearchServiceTests {
             let results = try await search(pub, query: "lovely.", options: .init(caseSensitive: true))
 
             let match = try #require(results.first { $0.href.string == "EPUB/chapter1.xhtml" })
-            #expect(match.text.after == "The quick brown fox.")
+            // The space separating the two elements leads the snippet, as it
+            // does for an `after` snippet anywhere else in a resource.
+            #expect(match.text.after == " The quick brown fox.")
         }
 
         /// Non-text elements read into the lookahead buffer during a previous
@@ -447,7 +449,7 @@ struct SearchServiceTests {
             let results = try await search(pub, query: "2024-01-15.")
 
             let match = try #require(results.first { $0.href.string == "EPUB/chapter2.xhtml" })
-            #expect(match.text.after == "The sun")
+            #expect(match.text.after == " The sun")
         }
     }
 

@@ -89,7 +89,7 @@ enum ContentSearchServiceTests {
             let result = try #require(results.first)
             #expect(result.text.highlight == "abc")
             #expect(result.text.before == "第一段。 \u{0301}")
-            #expect(result.text.after == "def")
+            #expect(result.text.after == " def")
         }
 
         /// A long resource forces the window to be front-trimmed repeatedly,
@@ -105,6 +105,34 @@ enum ContentSearchServiceTests {
             #expect(results.count == elementCount)
             #expect(results.allSatisfy { $0.text.highlight == "夜灯" })
             #expect(results.map(\.locations.fragments) == (0 ..< elementCount).map { ["e\($0)s1"] })
+        }
+    }
+
+    /// The snippets around a match keep the whitespace that separates them
+    /// from it, so that `before + highlight + after` reads as the original.
+    struct SnippetWhitespace {
+        /// The `after` snippet of a match near the end of a resource reaches
+        /// the end of the window, where trailing whitespace is trimmed. Its
+        /// leading whitespace must stay: it separates the match from the next
+        /// word.
+        @Test func afterSnippetKeepsItsLeadingSpaceAtTheEndOfAResource() async throws {
+            let results = try await search(query: "speed", elements: [
+                ["Tap the speed button."],
+            ])
+
+            let result = try #require(results.first)
+            #expect(result.text.before == "Tap the ")
+            #expect(result.text.highlight == "speed")
+            #expect(result.text.after == " button.")
+        }
+
+        @Test func afterSnippetLosesTrailingWhitespaceAtTheEndOfAResource() async throws {
+            let results = try await search(query: "speed", elements: [
+                ["Tap the speed button.  "],
+            ])
+
+            let result = try #require(results.first)
+            #expect(result.text.after == " button.")
         }
     }
 }
