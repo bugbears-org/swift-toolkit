@@ -59,6 +59,9 @@ All notable changes to this project will be documented in this file. Take a look
     * Seeking in the entry of a local ZIP package stored without compression no longer reads the entry again from its start.
     * Fixed a crash when reading a corrupted compressed entry of a local ZIP package.
 * Fixed missing items in the table of contents of some PDFs, when their named destinations are declared as dictionaries.
+* Fixed missing spaces in the text of HTML content and in search results:
+    * `HTMLResourceContentIterator` keeps the whitespace between two inline elements, such as the sentences of `<span>One.</span> <span>Two.</span>` in a Media Overlay, instead of joining them as `One.Two.`.
+    * The `after` snippet of a search result at the end of a resource keeps the whitespace separating it from the match, like other snippets, instead of joining them (e.g. `speedbutton`).
 
 #### Navigator
 

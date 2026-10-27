@@ -344,6 +344,16 @@ public actor HTMLResourceContentIterator: ContentIterator {
                 guard !isInsideSkippedElement else { return }
 
                 guard let wholeText = node.getWholeText().orNilIfBlank() else {
+                    // Whitespace alone still separates the words of two inline
+                    // elements, e.g. the sentences of `<span>One.</span>
+                    // <span>Two.</span>`. Kept only within a run of text: around
+                    // block elements, it is merely indentation. It has no
+                    // language of its own, so it never starts a new segment.
+                    let whitespace = node.getWholeText()
+                    if !whitespace.isEmpty, !textAcc.toString().isEmpty {
+                        rawTextAcc += whitespace
+                        try appendNormalisedText(whitespace)
+                    }
                     return
                 }
 
